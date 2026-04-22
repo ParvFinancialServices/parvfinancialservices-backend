@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import RefreshToken from '../models/RefreshToken.js';
+import { getAccessTokenCookieOptions } from '../utils/cookieOptions.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key-change-in-production';
@@ -38,12 +39,7 @@ export const checkAuthentication = async (req, res, next) => {
           );
 
           // Set new access token cookie
-          res.cookie('accessToken', accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 15 * 60 * 1000 // 15 minutes
-          });
+          res.cookie('accessToken', accessToken, getAccessTokenCookieOptions());
         }
       } catch (refreshError) {
         // Refresh token invalid, continue to return 401
@@ -80,12 +76,7 @@ export const checkAuthentication = async (req, res, next) => {
             );
 
             // Set new access token cookie
-            res.cookie('accessToken', newAccessToken, {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === 'production',
-              sameSite: 'strict',
-              maxAge: 15 * 60 * 1000
-            });
+            res.cookie('accessToken', newAccessToken, getAccessTokenCookieOptions());
 
             decoded = refreshDecoded;
           } else {

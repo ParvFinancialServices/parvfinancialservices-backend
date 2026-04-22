@@ -5,6 +5,11 @@ import crypto from 'crypto';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import sendMail from "../emails/mail.js";
+import {
+  getAccessTokenCookieOptions,
+  getClearedCookieOptions,
+  getRefreshTokenCookieOptions,
+} from "../utils/cookieOptions.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
@@ -23,25 +28,15 @@ const generateRefreshToken = (userId) => {
 
 // Set Cookies
 const setTokenCookies = (res, accessToken, refreshToken) => {
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 15 * 60 * 1000
-  });
-
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 30 * 24 * 60 * 60 * 1000
-  });
+  res.cookie("accessToken", accessToken, getAccessTokenCookieOptions());
+  res.cookie("refreshToken", refreshToken, getRefreshTokenCookieOptions());
 };
 
 // Clear Cookies
 const clearTokenCookies = (res) => {
-  res.cookie("accessToken", "", { expires: new Date(0), httpOnly: true });
-  res.cookie("refreshToken", "", { expires: new Date(0), httpOnly: true });
+  const clearedCookieOptions = getClearedCookieOptions();
+  res.cookie("accessToken", "", clearedCookieOptions);
+  res.cookie("refreshToken", "", clearedCookieOptions);
 };
 
 
@@ -135,12 +130,7 @@ export const refreshToken = async (req, res) => {
     const newAccessToken = generateAccessToken(decoded.id);
 
     // Set new cookie
-    res.cookie("accessToken", newAccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 15 * 60 * 1000
-    });
+    res.cookie("accessToken", newAccessToken, getAccessTokenCookieOptions());
 
     return res.status(200).json({ 
       success: true, 

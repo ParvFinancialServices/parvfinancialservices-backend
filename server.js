@@ -25,17 +25,14 @@ connectDB();
 
 const app = express();
 
-// Middleware
-// app.use(cors({
-//   origin: process.env.CLIENT_URL || 'http://localhost:3000' || 'http://localhost:3002',
-//   credentials: true
-// }));
-
-
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3002',
-  'https://your-frontend-domain.com'
+  "http://localhost:3000",
+  "http://localhost:3002",
+  "https://parv-frontend-m4dh.vercel.app/login",
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+  ...(process.env.FRONTEND_URLS
+    ? process.env.FRONTEND_URLS.split(",").map((origin) => origin.trim()).filter(Boolean)
+    : []),
 ];
 
 app.use(cors({
