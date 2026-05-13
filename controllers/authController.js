@@ -53,10 +53,10 @@ export const login = async (req, res) => {
     const user = await User.findOne({ username });
 
     if (!user)
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "User not registered" });
 
     if (!user.verifyPassword(password))
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Wrong username or password" });
 
     // Check User Status (Active/Inactive)
     if (user.status !== "approved") {

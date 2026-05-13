@@ -121,8 +121,11 @@ const escapeRegex = (value) => {
     return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };
 
+const buildCaseInsensitiveRegex = (value) => new RegExp(escapeRegex(String(value || "").trim()), "i");
+
 const buildModelFilter = ({ status, search, loanId, connector, createdById, startDate, endDate }, modelKey) => {
     const filter = { isDeleted: false };
+    const andConditions = [];
 
     if (status && status !== "all") {
         const normalizedStatus = normalizeStatus(status);
@@ -146,24 +149,33 @@ const buildModelFilter = ({ status, search, loanId, connector, createdById, star
     }
 
     if (search) {
-        const safeSearch = escapeRegex(search);
-        filter.$or = [
-            { applicantName: { $regex: safeSearch, $options: "i" } },
-            { applicant_name: { $regex: safeSearch, $options: "i" } },
-            { group_name: { $regex: safeSearch, $options: "i" } },
-            { phone: { $regex: safeSearch, $options: "i" } },
-            { phone_no: { $regex: safeSearch, $options: "i" } },
-            { loanId: { $regex: safeSearch, $options: "i" } },
-            { connectorName: { $regex: safeSearch, $options: "i" } }
-        ];
+        const safeSearch = buildCaseInsensitiveRegex(search);
+        andConditions.push({
+            $or: [
+            { applicantName: safeSearch },
+            { applicant_name: safeSearch },
+            { group_name: safeSearch },
+            { phone: safeSearch },
+            { phone_no: safeSearch },
+            { loanId: safeSearch },
+            { name_of_connector: safeSearch },
+            { id_of_connector: safeSearch }
+            ]
+        });
     }
 
     if (loanId) {
-        filter.loanId = { $regex: escapeRegex(loanId), $options: "i" };
+        filter.loanId = buildCaseInsensitiveRegex(loanId);
     }
 
     if (connector) {
-        filter.connectorName = { $regex: escapeRegex(connector), $options: "i" };
+        const connectorSearch = buildCaseInsensitiveRegex(connector);
+        andConditions.push({
+            $or: [
+            { name_of_connector: connectorSearch },
+            { id_of_connector: connectorSearch }
+            ]
+        });
     }
 
     if (startDate || endDate) {
@@ -174,6 +186,10 @@ const buildModelFilter = ({ status, search, loanId, connector, createdById, star
             end.setHours(23, 59, 59, 999);
             filter.createdAt.$lte = end;
         }
+    }
+
+    if (andConditions.length) {
+        filter.$and = andConditions;
     }
 
     return filter;
@@ -201,6 +217,7 @@ const toUnifiedListItem = (doc, modelKey) => {
         phone,
         loanAmount: doc.amount || doc.loan_amount || "",
         connectorName: doc.name_of_connector || "",
+        connectorId: doc.id_of_connector || "",
         status: normalizeStatus(doc.status) || doc.status || "Application Received",
         createdAt: doc.createdAt,
     };
