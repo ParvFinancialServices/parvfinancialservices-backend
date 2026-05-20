@@ -113,30 +113,23 @@ export const createEmployee = async (req, res) => {
     };
 
     // Create employee in DB
-    const newEmp = await User.create(employeeData);
+    await User.create(employeeData);
 
-    // Send welcome email
-    const mailRes = await sendMail("PasswordSending", {
-      fullName,
-      username,
-      password: tempPassword,
-      email
-    });
-
-    // If email failed
-    if (mailRes?.err) {
-      return res.status(201).json({
-        success: true,
-        message: "Account created but email failed to send.",
-        data: { username, tempPassword }
-      });
-    }
-
-    // Success response
+    // Respond immediately so public DSA signup doesn't stay stuck on slow SMTP.
     res.status(201).json({
       success: true,
       message: `${role} account created successfully.`,
       data: { username, tempPassword }
+    });
+
+    // Send welcome email in background; don't block the API response.
+    sendMail("PasswordSending", {
+      fullName,
+      username,
+      password: tempPassword,
+      email
+    }).catch((mailError) => {
+      console.error("Welcome email send error:", mailError);
     });
 
   } catch (error) {

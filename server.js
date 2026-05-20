@@ -28,6 +28,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3002",
+  "https://www.parvfinancialservices.com",
   "https://parv-frontend-m4dh.vercel.app",
   ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
   ...(process.env.FRONTEND_URLS
