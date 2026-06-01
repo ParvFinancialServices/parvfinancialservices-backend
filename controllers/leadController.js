@@ -238,3 +238,33 @@ export const addLeadRemark = async (req, res) => {
     });
   }
 };
+
+export const deleteLeadRemark = async (req, res) => {
+  try {
+    const { id, remarkId } = req.params;
+    const lead = await Lead.findById(id);
+
+    if (!lead) {
+      return res.status(404).json({ success: false, message: "Lead not found" });
+    }
+
+    const remark = lead.remarks.id(remarkId);
+    if (!remark) {
+      return res.status(404).json({ success: false, message: "Remark not found" });
+    }
+
+    remark.remove();
+    await lead.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Remark deleted successfully",
+      data: lead,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message || "Failed to delete remark",
+    });
+  }
+};

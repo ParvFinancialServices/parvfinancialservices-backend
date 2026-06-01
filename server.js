@@ -17,8 +17,6 @@ import adminFilteredRoutes from './routes/adminFilteredRoutes.js';
 
 // Load environment variables
 dotenv.config();
-console.log(process.env.JWT_SECRET);
-
 
 // Connect to MongoDB
 connectDB();

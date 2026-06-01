@@ -1,5 +1,12 @@
 import mongoose from 'mongoose';
 
+const remarkSchema = new mongoose.Schema({
+  text: String,
+  createdBy: String,
+  userId: String,
+  createdAt: { type: Date, default: Date.now },
+}, { _id: false });
+
 const loanSchema = new mongoose.Schema({
   id_of_connector: {
     type: String,
@@ -15,6 +22,7 @@ const loanSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  remarks: [remarkSchema],
   // Add other loan fields as needed
   createdAt: {
     type: Date,

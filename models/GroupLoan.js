@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 
+const remarkSchema = new mongoose.Schema({
+    text: String,
+    createdBy: String,
+    userId: String,
+    createdAt: { type: Date, default: Date.now },
+}, { _id: false });
+
 const memberDocumentSchema = new mongoose.Schema({
     aadhar_front: String,
     aadhar_back: String,
@@ -67,6 +74,7 @@ const groupLoanSchema = new mongoose.Schema(
             ],
             default: "Application Received"
         },
+        remarks: [remarkSchema],
         isDeleted: { type: Boolean, default: false },
         createdById: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         createdByName: String,

@@ -382,6 +382,84 @@ export const getLoanById = async (req, res) => {
     }
 };
 
+export const addLoanRemark = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { text, createdBy, userId } = req.body || {};
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, message: "Invalid loan id" });
+        }
+
+        if (!text || !String(text).trim()) {
+            return res.status(400).json({ success: false, message: "Remark text is required" });
+        }
+
+        const lookups = await Promise.all(
+            LOAN_MODELS.map(async ({ Model }) => {
+                const loan = await Model.findOne({ _id: id, isDeleted: false });
+                return loan ? { Model, loan } : null;
+            })
+        );
+
+        const found = lookups.find(Boolean);
+        if (!found) return res.status(404).json({ success: false, message: "Loan not found" });
+
+        const remark = {
+            text: String(text).trim(),
+            createdBy: createdBy || req.user?.full_name || req.user?.username || "Unknown",
+            userId: userId || req.user?.username || req.user?._id?.toString() || "unknown",
+            createdAt: new Date(),
+        };
+
+        found.loan.remarks = Array.isArray(found.loan.remarks) ? found.loan.remarks : [];
+        found.loan.remarks.push(remark);
+        const updated = await found.loan.save();
+
+        res.status(200).json({ success: true, message: "Remark added successfully", data: updated });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+export const deleteLoanRemark = async (req, res) => {
+    try {
+        const { id, remarkIndex } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, message: "Invalid loan id" });
+        }
+
+        const index = Number(remarkIndex);
+        if (Number.isNaN(index) || index < 0) {
+            return res.status(400).json({ success: false, message: "Invalid remark index" });
+        }
+
+        const lookups = await Promise.all(
+            LOAN_MODELS.map(async ({ Model }) => {
+                const loan = await Model.findOne({ _id: id, isDeleted: false });
+                return loan ? { Model, loan } : null;
+            })
+        );
+
+        const found = lookups.find(Boolean);
+        if (!found) return res.status(404).json({ success: false, message: "Loan not found" });
+
+        const remarks = Array.isArray(found.loan.remarks) ? found.loan.remarks : [];
+        if (index >= remarks.length) {
+            return res.status(400).json({ success: false, message: "Remark not found" });
+        }
+
+        remarks.splice(index, 1);
+        found.loan.remarks = remarks;
+        const updated = await found.loan.save();
+
+        res.status(200).json({ success: true, message: "Remark deleted successfully", data: updated });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 export const updateLoan = async (req, res) => {
     try {
         const { id } = req.params;

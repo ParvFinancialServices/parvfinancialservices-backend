@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 
+const remarkSchema = new mongoose.Schema({
+    text: String,
+    createdBy: String,
+    userId: String,
+    createdAt: { type: Date, default: Date.now },
+}, { _id: false });
+
 const loanHistorySchema = new mongoose.Schema({
     loan_provider_bank: String,
     total_loan_amount: String,
@@ -149,6 +156,7 @@ const vehicleLoanSchema = new mongoose.Schema(
             ],
             default: "Application Received"
         },
+        remarks: [remarkSchema],
         isDeleted: { type: Boolean, default: false },
         createdById: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         createdByName: String,

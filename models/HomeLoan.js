@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 
+const remarkSchema = new mongoose.Schema({
+    text: String,
+    createdBy: String,
+    userId: String,
+    createdAt: { type: Date, default: Date.now },
+}, { _id: false });
+
 const homeLoanSchema = new mongoose.Schema(
     {
         folderName: { type: String, required: true },
@@ -138,6 +145,7 @@ const homeLoanSchema = new mongoose.Schema(
             ],
             default: "Application Received"
         },
+        remarks: [remarkSchema],
         isDeleted: { type: Boolean, default: false },
         createdById: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         createdByName: String,

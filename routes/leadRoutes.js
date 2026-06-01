@@ -6,7 +6,8 @@ import {
   updateLead,
   deleteLead,
   updateLeadStatus,
-  addLeadRemark
+  addLeadRemark,
+  deleteLeadRemark
 } from '../controllers/leadController.js';
 
 import { checkAuthentication } from '../middleware/auth.js';
@@ -27,5 +28,6 @@ router.route('/:id')
 
 router.patch('/:id/status', updateLeadStatus);
 router.post('/:id/remarks', addLeadRemark);
+router.delete('/:id/remarks/:remarkId', deleteLeadRemark);
 
 export default router;

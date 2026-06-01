@@ -7,6 +7,13 @@ const loanHistorySchema = new mongoose.Schema({
     remaining_amount: String,
 }, { _id: false });
 
+const remarkSchema = new mongoose.Schema({
+    text: String,
+    createdBy: String,
+    userId: String,
+    createdAt: { type: Date, default: Date.now },
+}, { _id: false });
+
 const personalLoanSchema = new mongoose.Schema(
     {
         folderName: { type: String, required: true },
@@ -111,6 +118,7 @@ const personalLoanSchema = new mongoose.Schema(
             ],
             default: "Application Received"
         },
+        remarks: [remarkSchema],
         isDeleted: { type: Boolean, default: false },
         createdById: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         createdByName: String,

@@ -39,6 +39,8 @@ const normalizeDSALoan = (doc, loanTypeFallback = 'Unknown') => ({
   loanAmount: doc.amount || doc.loan_amount || 0,
   loanType: doc.loanType || loanTypeFallback,
   status: doc.status || 'Application Received',
+  remarkCount: Array.isArray(doc.remarks) ? doc.remarks.length : 0,
+  remarks: Array.isArray(doc.remarks) ? doc.remarks : [],
   createdAt: doc.createdAt || null
 });
 
