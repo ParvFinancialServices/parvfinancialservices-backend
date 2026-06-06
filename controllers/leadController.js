@@ -253,7 +253,14 @@ export const deleteLeadRemark = async (req, res) => {
       return res.status(404).json({ success: false, message: "Remark not found" });
     }
 
-    remark.remove();
+    if (typeof remark.remove === "function") {
+      remark.remove();
+    } else {
+      lead.remarks = lead.remarks.filter(
+        (r) => String(r._id) !== String(remarkId)
+      );
+    }
+
     await lead.save();
 
     res.status(200).json({
