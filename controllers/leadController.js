@@ -79,6 +79,15 @@ export const getLeads = async (req, res) => {
       query.monthYear = new RegExp(`^${year}-`);
     }
 
+    // Restrict non-admin users to their own leads
+    if (req.userRole !== 'Admin') {
+      if (req.userRole === 'DSA') {
+        query.dsa_username = req.user.username;
+      } else {
+        query.createdById = req.userId;
+      }
+    }
+
     const total = await Lead.countDocuments(query);
     const leads = await Lead.find(query)
       .sort({ createdAt: -1 }) // Newest first
